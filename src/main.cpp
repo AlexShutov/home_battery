@@ -3,14 +3,13 @@
 
 Display display;
 
-int secondsLeft = 100;
 unsigned long lastUpdate = 0;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   display.init();
-  display.print("hello", String(secondsLeft) + " seconds");
+  display.print("батарея", "заряжена");
 }
 
 void loop() {
@@ -18,10 +17,6 @@ void loop() {
 
   if (now - lastUpdate >= 1000) {
     lastUpdate = now;
-
-    if (secondsLeft > 0) {
-      secondsLeft--;
-      display.print("hello", String(secondsLeft) + " seconds");
-    }
+    display.print("battery", "charged");
   }
 }
