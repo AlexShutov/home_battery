@@ -1,20 +1,27 @@
 #include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
+#include "display.h"
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+Display display;
+
+int secondsLeft = 100;
+unsigned long lastUpdate = 0;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
-  lcd.begin(16, 2);
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("hello world!");
+  display.init();
+  display.print("hello", String(secondsLeft) + " seconds");
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
+  unsigned long now = millis();
+
+  if (now - lastUpdate >= 1000) {
+    lastUpdate = now;
+
+    if (secondsLeft > 0) {
+      secondsLeft--;
+      display.print("hello", String(secondsLeft) + " seconds");
+    }
+  }
 }
