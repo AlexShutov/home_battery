@@ -100,7 +100,11 @@ void CyrillicMapper::readGlyph(uint8_t index, uint8_t* out) {
     return;
   }
   for (uint8_t row = 0; row < 8; row++) {
-    out[row] = pgm_read_byte(&glyphTable[index][row]);
+    uint8_t b = pgm_read_byte(&glyphTable[index][row]);
+    // HD44780 выводит старший бит схемы левым (bit4 = левый столбец, bit0 = правый).
+    // Таблица нарисована как "бит 0 = левый", поэтому зеркалим строку по 5 битам.
+    out[row] = ((b & 0x10) >> 4) | ((b & 0x08) >> 2) | (b & 0x04) |
+               ((b & 0x02) << 2) | ((b & 0x01) << 4);
   }
 }
 
