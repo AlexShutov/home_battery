@@ -100,7 +100,9 @@ void CyrillicMapper::readGlyph(uint8_t index, uint8_t* out) {
     return;
   }
   for (uint8_t row = 0; row < 8; row++) {
-    out[row] = pgm_read_byte(&glyphTable[index][row]);
+    uint8_t b = pgm_read_byte(&glyphTable[index][row]);
+    out[row] = ((b & 0x01) << 4) | ((b & 0x02) << 2) | (b & 0x04) |
+               ((b & 0x08) >> 2) | ((b & 0x10) >> 4);
   }
 }
 
