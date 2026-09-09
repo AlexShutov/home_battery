@@ -9,7 +9,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   display.init();
-  display.print("батарея", "заряжена");
+  display.print("батарея", "заряд");
 }
 
 void loop() {
