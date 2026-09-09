@@ -9,14 +9,14 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   display.init();
-  display.print("батарея", "заряд");
+  display.print("battery", "charge");
 }
 
 void loop() {
-  unsigned long now = millis();
+  // unsigned long now = millis();
 
-  if (now - lastUpdate >= 1000) {
-    lastUpdate = now;
-    display.print("battery", "charged");
-  }
+  // if (now - lastUpdate >= 1000) {
+  //   lastUpdate = now;
+  //   display.print("battery", "charge");
+  // }
 }
