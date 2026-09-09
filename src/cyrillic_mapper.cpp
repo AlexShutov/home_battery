@@ -100,9 +100,7 @@ void CyrillicMapper::readGlyph(uint8_t index, uint8_t* out) {
     return;
   }
   for (uint8_t row = 0; row < 8; row++) {
-    uint8_t b = pgm_read_byte(&glyphTable[index][row]);
-    out[row] = ((b & 0x01) << 4) | ((b & 0x02) << 2) | (b & 0x04) |
-               ((b & 0x08) >> 2) | ((b & 0x10) >> 4);
+    out[row] = pgm_read_byte(&glyphTable[index][row]);
   }
 }
 
@@ -124,17 +122,17 @@ uint8_t CyrillicMapper::mapToCyril(const uint8_t* data, uint8_t length, uint8_t*
 
   uint8_t o = 0;
   uint8_t i = 0;
-  while (i < length) {
+  while (i < length && o + 1 < outSize) {
     uint8_t b = data[i];
+
+    // ASCII (0x00-0x7F) проходит без изменений
     if (b < 0x80) {
-      if (o + 1 < outSize) {
-        out[o++] = b;
-      }
+      out[o++] = b;
       i++;
       continue;
     }
 
-    // Пытаемся декодировать UTF-8
+    // Декодирование UTF-8 (2 и 3 байта)
     uint16_t cp = 0;
     uint8_t seq = 0;
     if ((b >= 0xC2 && b <= 0xDF) && i + 1 < length && (data[i + 1] & 0xC0) == 0x80) {
@@ -149,45 +147,31 @@ uint8_t CyrillicMapper::mapToCyril(const uint8_t* data, uint8_t length, uint8_t*
     if (seq > 0) {
       if (isCyrillic(cp)) {
         uint8_t index = glyphIndex(cp);
-        if (index != 0xFF && o + 1 < outSize) {
+        if (index != 0xFF) {
           out[o++] = CYRILLIC_BASE + index;
         }
       } else {
-        for (uint8_t k = 0; k < seq; k++) {
-          if (o + 1 < outSize) {
-            out[o++] = data[i + k];
-          }
+        for (uint8_t k = 0; k < seq && o + 1 < outSize; k++) {
+          out[o++] = data[i + k];
         }
       }
       i += seq;
       continue;
     }
 
-    // Одиночный байт выше 0x7F: распознаём windows-1251, затем cp866
-    if (b >= 0xC0 && b <= 0xDF) {
-      if (o + 1 < outSize) {
-        out[o++] = CYRILLIC_BASE + glyphIndex(0x0410 + (b - 0xC0)); // А-Я (1251)
-      }
+    // Одиночный байт выше 0x7F: windows-1251, затем cp866
+    if (b == 0xA8) {
+      out[o++] = CYRILLIC_BASE + 32; // Ё (1251)
+    } else if (b == 0xB8) {
+      out[o++] = CYRILLIC_BASE + 65; // ё (1251)
+    } else if (b >= 0xC0 && b <= 0xDF) {
+      out[o++] = CYRILLIC_BASE + glyphIndex(0x0410 + (b - 0xC0)); // А-Я (1251)
     } else if (b >= 0xE0 && b <= 0xFF) {
-      if (o + 1 < outSize) {
-        out[o++] = CYRILLIC_BASE + glyphIndex(0x0430 + (b - 0xE0)); // а-я (1251)
-      }
-    } else if (b == 0xA2) {
-      if (o + 1 < outSize) {
-        out[o++] = CYRILLIC_BASE + 32; // Ё (1251)
-      }
-    } else if (b == 0xA3) {
-      if (o + 1 < outSize) {
-        out[o++] = CYRILLIC_BASE + 65; // ё (1251)
-      }
+      out[o++] = CYRILLIC_BASE + glyphIndex(0x0430 + (b - 0xE0)); // а-я (1251)
     } else if (b >= 0x80 && b <= 0x9F) {
-      if (o + 1 < outSize) {
-        out[o++] = CYRILLIC_BASE + glyphIndex(0x0410 + (b - 0x80)); // А-Я (cp866)
-      }
+      out[o++] = CYRILLIC_BASE + glyphIndex(0x0410 + (b - 0x80)); // А-Я (cp866)
     } else {
-      if (o + 1 < outSize) {
-        out[o++] = b;
-      }
+      out[o++] = b;
     }
     i++;
   }
