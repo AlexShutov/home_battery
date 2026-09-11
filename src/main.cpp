@@ -48,7 +48,7 @@ void updateState() {
 }
 
 void readDeviceState(DeviceState& state) {
-  time_switcher.getState(state.time_switcher);
+  state.time_interval_type = time_switcher.getState();
   relays.getState(state.relays);
 }
 
@@ -57,7 +57,7 @@ void update() {
   readDeviceState(new_device_state);
 
   // Сравнивание только через оператор == структуры состояния.
-  if (!(new_device_state.time_switcher == device_state.time_switcher)) {
+  if (!(new_device_state.time_interval_type == device_state.time_interval_type)) {
     device_state = new_device_state;
     screen.print_state(device_state);
     updateState();

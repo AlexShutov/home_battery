@@ -9,7 +9,15 @@ void TimeSwitcher::init() {
 }
 
 // Активность периода определяется уровнем LOW (входы подтянуты на высокий уровень).
-void TimeSwitcher::getState(TimeSwitcherState& out) {
-  out.isMiddlePeriodActive = (digitalRead(PIN_MIDDLE_PERIOD) == LOW);
-  out.isExpensivePeriodActive = (digitalRead(PIN_EXPENSIVE_PERIOD) == LOW);
+TimeInterval TimeSwitcher::getState() {
+  state.isMiddlePeriodActive = (digitalRead(PIN_MIDDLE_PERIOD) == LOW);
+  state.isExpensivePeriodActive = (digitalRead(PIN_EXPENSIVE_PERIOD) == LOW);
+
+  if (state.isMiddlePeriodActive) {
+    return MIDDLE;
+  }
+  if (state.isExpensivePeriodActive) {
+    return EXPENSIVE;
+  }
+  return CHEAP;
 }

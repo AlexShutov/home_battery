@@ -9,12 +9,12 @@ struct DeviceState {
     // Состояние реле.
     RelayState relays;
 
-    // Состояние выключателя тарифных периодов (D6/D7).
-    TimeSwitcherState time_switcher;
+    // Тарифный период по выключателю (D6/D7).
+    TimeInterval time_interval_type;
 
     // Сравнивает два состояния на равенство.
     bool operator==(const DeviceState& other) const {
-        return relays == other.relays && time_switcher == other.time_switcher;
+        return relays == other.relays && time_interval_type == other.time_interval_type;
     }
 };
 
