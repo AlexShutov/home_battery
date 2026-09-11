@@ -1,25 +1,30 @@
 #include <Arduino.h>
 #include "display.h"
+#include "device_screen.h"
 #include "relays.h"
 
 Display display;
 Relays relays;
+DeviceScreen screen;
+DeviceState device_state;
 
 const uint16_t RELAY_TIME = 500;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
-  display.init();
-  display.print("battery", "charge");
-
+  screen.init(display);
   relays.init();
 }
 
 void turnRelay(uint8_t relay) {
   relays.turnOn(relay);
+  relays.getState(device_state.relays);
+  screen.print_state(device_state);
   delay(RELAY_TIME);
   relays.turnOff(relay);
+  relays.getState(device_state.relays);
+  screen.print_state(device_state);
   delay(RELAY_TIME);
 }
 
