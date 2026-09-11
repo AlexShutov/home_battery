@@ -9,6 +9,12 @@ struct TimeSwitcherState {
 
     // Активен ли дорогой период (ножка D7).
     bool isExpensivePeriodActive;
+
+    // Сравнивает два состояния на равенство.
+    bool operator==(const TimeSwitcherState& other) const {
+        return isMiddlePeriodActive == other.isMiddlePeriodActive &&
+               isExpensivePeriodActive == other.isExpensivePeriodActive;
+    }
 };
 
 class TimeSwitcher {
@@ -19,18 +25,10 @@ public:
     // Возвращает актуальное состояние выключателя во входной параметр (ножки считываются при каждом вызове).
     void getState(TimeSwitcherState& out);
 
-    // Вручную устанавливает внутреннее состояние; аппаратная часть отсутствует (D6/D7 — входы внешнего контроллера).
-    void setState(const TimeSwitcherState& newState);
-
 private:
     // Ножка промежуточного периода (D6).
     static const uint8_t PIN_MIDDLE_PERIOD = 6;
 
     // Ножка дорогого периода (D7).
     static const uint8_t PIN_EXPENSIVE_PERIOD = 7;
-
-    // Считывает уровни выключателя в состояние устройства.
-    void readState();
-
-    TimeSwitcherState state;
 };

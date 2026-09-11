@@ -2,11 +2,20 @@
 
 #include "display.h"
 #include "relays.h"
+#include "time_switcher.h"
 
 // Состояние устройства, выводимое на дисплей.
 struct DeviceState {
     // Состояние реле.
     RelayState relays;
+
+    // Состояние выключателя тарифных периодов (D6/D7).
+    TimeSwitcherState time_switcher;
+
+    // Сравнивает два состояния на равенство.
+    bool operator==(const DeviceState& other) const {
+        return relays == other.relays && time_switcher == other.time_switcher;
+    }
 };
 
 class DeviceScreen {
