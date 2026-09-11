@@ -2,10 +2,12 @@
 #include "display.h"
 #include "device_screen.h"
 #include "relays.h"
+#include "time_switcher.h"
 
 Display display;
 Relays relays;
 DeviceScreen screen;
+TimeSwitcher time_switcher;
 DeviceState device_state;
 
 const uint16_t RELAY_TIME = 500;
@@ -15,6 +17,7 @@ void setup() {
 
   screen.init(display);
   relays.init();
+  time_switcher.init();
 }
 
 void turnRelay(uint8_t relay) {
