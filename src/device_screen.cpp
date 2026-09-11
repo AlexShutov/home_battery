@@ -3,6 +3,9 @@
 // Статический буфер строки состояния реле (длина не превышает Display::LINE_BUF).
 static char STATE_LINE[Display::LINE_BUF];
 
+// Статический буфер обозначения тарифного периода (3 символа + '\0').
+static char INTERVAL_LINE[4];
+
 void DeviceScreen::init(Display& display) {
   m_display = &display;
   m_display->init();
@@ -22,6 +25,16 @@ void DeviceScreen::print_state(const DeviceState& state) {
   }
   STATE_LINE[pos] = '\0';
 
-  // Выводим состояние на первую строку, вторую оставляем пустой.
-  m_display->print(STATE_LINE, "");
+  // Обозначение активного тарифного периода (3 символа) для второй строки.
+  if (state.time_interval_type == MIDDLE) {
+    memcpy(INTERVAL_LINE, "mdl", 3u);
+  } else if (state.time_interval_type == EXPENSIVE) {
+    memcpy(INTERVAL_LINE, "exp", 3u);
+  } else {
+    memcpy(INTERVAL_LINE, "chp", 3u);
+  }
+  INTERVAL_LINE[3] = '\0';
+
+  // Выводим состояние реле на первую строку и тарифный период на вторую.
+  m_display->print(STATE_LINE, INTERVAL_LINE);
 }
