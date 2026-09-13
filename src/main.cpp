@@ -26,6 +26,7 @@ void setup() {
   time_switcher.init();
   readDeviceState(device_state);
   new_device_state = device_state;
+  screen.print_state(device_state);
 }
 
 void turnRelay(uint8_t relay) {
@@ -63,6 +64,7 @@ void update() {
     updateState();
     delay(STATE_CHANGE_DELAY);
   }
+  device_state = new_device_state;
 }
 
 void loop() {
