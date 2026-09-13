@@ -25,6 +25,10 @@ public:
     // Считывает ножки и возвращает активный тарифный период.
     TimeInterval getState();
 
+protected:
+    // Гасит дребезг контакта: опрашивает ножку через колбэк до DEBOUNCE_SAMPLES одинаковых подряд срабатываний.
+    bool readDebounced(uint8_t pin, bool (*readLevel)(uint8_t));
+
 private:
     // Внутреннее состояние двухканального выключателя умного дома (ножки D6/D7).
     struct TimeSwitcherState {
@@ -52,9 +56,6 @@ private:
 
     // Задержка между опросами ножки при гашении дребезга, мс.
     static const uint16_t DEBOUNCE_DELAY_MS = 5;
-
-    // Гасит дребезг контакта: опрашивает ножку через колбэк до DEBOUNCE_SAMPLES одинаковых подряд срабатываний.
-    bool readDebounced(uint8_t pin, bool (*readLevel)(uint8_t));
 
     // Читает ножку промежуточного периода с гашением дребезга; true — период активен (LOW).
     bool readMiddlePeriodPin();
