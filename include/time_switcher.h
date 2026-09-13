@@ -47,6 +47,21 @@ private:
     // Ножка дорогого периода (D7).
     static const uint8_t PIN_EXPENSIVE_PERIOD = 7;
 
+    // Количество одинаковых подряд идущих опросов для гашения дребезга контакта.
+    static const uint8_t DEBOUNCE_SAMPLES = 4;
+
+    // Задержка между опросами ножки при гашении дребезга, мс.
+    static const uint16_t DEBOUNCE_DELAY_MS = 5;
+
+    // Гасит дребезг контакта: опрашивает ножку через колбэк до DEBOUNCE_SAMPLES одинаковых подряд срабатываний.
+    bool readDebounced(uint8_t pin, bool (*readLevel)(uint8_t));
+
+    // Читает ножку промежуточного периода с гашением дребезга; true — период активен (LOW).
+    bool readMiddlePeriodPin();
+
+    // Читает ножку дорогого периода с гашением дребезга; true — период активен (LOW).
+    bool readExpensivePeriodPin();
+
     // Внутреннее состояние выключателя.
     TimeSwitcherState state;
 };
