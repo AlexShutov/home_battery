@@ -11,7 +11,10 @@ enum TimeInterval : uint8_t {
     MIDDLE,
 
     // Дорогой период (ножка D7).
-    EXPENSIVE
+    EXPENSIVE,
+
+    // оба выключателя включены, принудительно включается зарядка
+    FORCE_CHARGING,
 };
 
 class TimeSwitcher {

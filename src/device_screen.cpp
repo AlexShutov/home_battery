@@ -26,11 +26,17 @@ void DeviceScreen::print_state(const DeviceState& state) {
   STATE_LINE[pos] = '\0';
 
   // Обозначение активного тарифного периода (3 символа) для второй строки.
-  if (state.time_interval_type == MIDDLE) {
+  if (state.time_interval_type == FORCE_CHARGING) {
+    // включена принудительная зарядка
+    memcpy(INTERVAL_LINE, "frc", 3u);
+  } else if (state.time_interval_type == MIDDLE) {
+    // средняя цена электричества
     memcpy(INTERVAL_LINE, "mdl", 3u);
   } else if (state.time_interval_type == EXPENSIVE) {
+    // дорогая цена электричества
     memcpy(INTERVAL_LINE, "exp", 3u);
   } else {
+    // дешевая цена электричества
     memcpy(INTERVAL_LINE, "chp", 3u);
   }
   INTERVAL_LINE[3] = '\0';

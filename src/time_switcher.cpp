@@ -13,11 +13,17 @@ TimeInterval TimeSwitcher::getState() {
   state.isMiddlePeriodActive = (digitalRead(PIN_MIDDLE_PERIOD) == LOW);
   state.isExpensivePeriodActive = (digitalRead(PIN_EXPENSIVE_PERIOD) == LOW);
 
+  if (state.isMiddlePeriodActive && state.isExpensivePeriodActive) {
+    return FORCE_CHARGING;
+  }
+
   if (state.isMiddlePeriodActive) {
     return MIDDLE;
   }
+
   if (state.isExpensivePeriodActive) {
     return EXPENSIVE;
   }
+  
   return CHEAP;
 }
