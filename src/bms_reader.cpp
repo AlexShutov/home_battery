@@ -1,7 +1,7 @@
 #include "bms_reader.h"
 
 // Привязываем драйвер к единственному аппаратному UART контроллера (Serial).
-BmsReader::BmsReader() : bms(Serial) {}
+BmsReader::BmsReader() : bms(Serial), connectionError(false) {}
 
 void BmsReader::init() {
   // Настраивает последовательный порт (9600, 8N1) по спецификации Daly.
@@ -11,10 +11,17 @@ void BmsReader::init() {
 bool BmsReader::readBmsValues(BmsReadings& readings) {
   // Запрашивает у БМС все блоки данных; update() заполняет структуры get/alarm.
   bool ok = bms.update();
+  // БМС не ответила по UART (считаем, что батарея разряжена и БМС отключилась) —
+  // запоминаем ошибку; успешное чтение её сбрасывает.
+  connectionError = !ok;
   // Переносим актуальные значения в выходной параметр независимо от результата
   // (частично обновлённые данные лучше пустых при обрыве связи).
   copyFromLibrary(readings);
   return ok;
+}
+
+bool BmsReader::isConnectionError() const {
+  return connectionError;
 }
 
 void BmsReader::copyFromLibrary(BmsReadings& readings) const {

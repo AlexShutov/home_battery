@@ -10,20 +10,32 @@ static char NUMBER_BUF[8];
 void TestBmsLogic::init() {
   // Инициализация компонентов выполняется базовым классом DeviceLogic (включая bms_reader).
   DeviceLogic::init();
+  // Первичная попытка подключиться к БМС: при ошибке связи BmsReader проставляет
+  // флаг, а на первую строку экрана выводится "bms disconnect".
+  printBms();
 }
 
 void TestBmsLogic::loop() {
-  // Считываем БМС: ток на первую строку, напряжение на вторую.
-  if (bms_reader.readBmsValues(readings)) {
+  // При установленном флаге ошибки readBmsValues внутри printBms() является повторной
+  // попыткой подключиться к БМС; успех сбрасывает флаг.
+  printBms();
+  delay(STATE_CHANGE_DELAY);
+}
+
+// Читает БМС и выводит показания либо "bms disconnect".
+void TestBmsLogic::printBms() {
+  // Попытка прочитать БМС (в том числе повторная попытка подключения при обрыве связи).
+  bms_reader.readBmsValues(readings);
+  if (bms_reader.isConnectionError()) {
+    // Связь с БМС недоступна (батарея разряжена) — "bms disconnect" в первой строке.
+    strcpy(CURRENT_LINE, "bms disconnect");
+    VOLTAGE_LINE[0] = '\0';
+  } else {
+    // Ток на первую строку, напряжение на вторую.
     formatCurrentLine(CURRENT_LINE, readings.packCurrent);
     formatVoltageLine(VOLTAGE_LINE, readings.packVoltage);
-  } else {
-    // БМС не ответила (нет связи) — выводим заглушку.
-    strcpy(CURRENT_LINE, "NO BMS");
-    strcpy(VOLTAGE_LINE, "DATA LOST");
   }
   display.print(CURRENT_LINE, VOLTAGE_LINE);
-  delay(STATE_CHANGE_DELAY);
 }
 
 void TestBmsLogic::formatCurrentLine(char* line, float current) {
