@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "bms_reader.h"
 #include "display.h"
 #include "device_screen.h"
 #include "relays.h"
@@ -36,6 +37,9 @@ protected:
 
     // Реле устройства.
     Relays relays;
+
+    // Чтец телеметрии Daly BMS (Serial, 9600 8N1).
+    BmsReader bms_reader;
 
     // Экран с выводом состояния устройства.
     DeviceScreen screen;

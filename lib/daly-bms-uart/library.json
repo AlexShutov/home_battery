@@ -1,0 +1,10 @@
+{
+    "name": "daly-bms-uart",
+    "version": "1.0.0",
+    "description": "Driver for Daly BMS over UART/RS485. Адаптировано: убраны String-поля (запрет динамической памяти проекта).",
+    "url": "https://github.com/maland16/daly-bms-uart",
+    "frameworks": [
+        "arduino"
+    ],
+    "license": "MIT"
+}

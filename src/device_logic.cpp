@@ -9,6 +9,7 @@ void DeviceLogic::init() {
   screen.init(display);
   relays.init();
   time_switcher.init();
+  bms_reader.init();
   readDeviceState(device_state);
   new_device_state = device_state;
   screen.print_state(device_state);
