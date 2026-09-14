@@ -1,21 +1,19 @@
 #include <Arduino.h>
 // #include "test_device_logic.h"
 // #include "test_ir_sensor.h"
-#include "test_bms_logic.h"
+#include "change_ir_sensor_address.h"
 
 // TestDeviceLogic device_logic;
 
 // TestIRSensor test_ir_sensor;
-TestBmsLogic test_bms_logic;
+ChangeIRSensorAddress change_ir_sensor_address;
 
 void setup() {
   // device_logic.init();
-  // test_ir_sensor.init();
-  test_bms_logic.init();
+  change_ir_sensor_address.init();
 }
 
 void loop() {
   // device_logic.loop();
-  // test_ir_sensor.loop();
-  test_bms_logic.loop();
+  change_ir_sensor_address.loop();
 }
