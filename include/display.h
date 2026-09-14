@@ -13,7 +13,7 @@ public:
     void init();
 
     // Выводит две строки в кодировке дисплея (ASCII).
-    void print(const String& firstString, const String& secondString);
+    void print(const char* firstString, const char* secondString);
 
 private:
     LiquidCrystal_I2C lcd;

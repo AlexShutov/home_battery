@@ -21,16 +21,18 @@ void DeviceLogic::readDeviceState(DeviceState& state) {
   relays.getState(state.relays);
 }
 
-// Считывает актуальное состояние из TimeSwitcher и Relays; при изменении тарифного периода вызывает updateState().
+// Считывает актуальное состояние из TimeSwitcher и Relays; при изменении состояния вызывает updateState().
 void DeviceLogic::update() {
   readDeviceState(new_device_state);
 
   // Сравнивание только через оператор == структуры состояния.
-  if (!(new_device_state.time_interval_type == device_state.time_interval_type)) {
+  if (!(new_device_state == device_state)) {
     device_state = new_device_state;
     screen.print_state(device_state);
     updateState();
+    // После реакции перечитываем фактическое состояние (updateState мог изменить реле),
+    // чтобы device_state не оставался устаревшим.
+    readDeviceState(device_state);
     delay(STATE_CHANGE_DELAY);
   }
-  device_state = new_device_state;
 }

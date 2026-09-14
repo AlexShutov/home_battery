@@ -15,10 +15,16 @@ static const char* const ADDR_RESULT[2] = { "addr chng ok", "adr chn er" };
 // Статический буфер первой строки экрана (длина не более Display::LINE_BUF).
 static char ADDR_LINE[Display::LINE_BUF];
 
-// Сканирует шину I2C в поисках первого устройства, кроме дисплея; 0 — устройств нет.
-static uint8_t scanI2CAddress() {
+// Ищет датчик MLX90614: сначала стандартный (дефолтный) адрес, затем сканирование
+// остальных адресов; 0 — устройств не найдено.
+static uint8_t scanI2CAddress(uint8_t defaultAddr) {
+  // Приоритет — датчик на стандартном адресе, его адрес и меняем.
+  Wire.beginTransmission(defaultAddr);
+  if (Wire.endTransmission() == 0u) {
+    return defaultAddr;
+  }
   for (uint8_t addr = 1u; addr <= 127u; ++addr) {
-    if (addr == DISPLAY_I2C_ADDRESS) {
+    if (addr == DISPLAY_I2C_ADDRESS || addr == defaultAddr) {
       continue;
     }
     Wire.beginTransmission(addr);
@@ -82,17 +88,18 @@ void ChangeIRSensorAddress::loop() {
   delay(STATE_CHANGE_DELAY);
 }
 
-void ChangeIRSensorAddress::writeIrSensorAddress() {
+bool ChangeIRSensorAddress::writeIrSensorAddress() {
   uint8_t newAddr = parseAddress(NEW_IR_ADDR);
 
   // Записываем в EEPROM новый адрес (стирание ячейки и повторная запись — как в
   // библиотеке для EEPROM). Адрес хранится в битах [7:1] младшего байта ячейки,
-  // поэтому значение сдвигаем на 1. После записи адрес вступает в силу после
-  // сброса (выключения питания) датчика.
-  writeEepromWord(current_addr, MLX90614_ADDR_REG, 0x0000);
+  // поэтому значение сдвигаем на 1. Новый адрес датчик применит после сброса
+  // (выключения питания), поэтому успех считаем по принятой записи.
+  bool ok = writeEepromWord(current_addr, MLX90614_ADDR_REG, 0x0000);
   delay(10);
-  writeEepromWord(current_addr, MLX90614_ADDR_REG, (uint16_t)(newAddr << 1));
+  ok = writeEepromWord(current_addr, MLX90614_ADDR_REG, (uint16_t)(newAddr << 1)) && ok;
   delay(10);
+  return ok;
 }
 
 void ChangeIRSensorAddress::changeAddress() {
@@ -100,15 +107,11 @@ void ChangeIRSensorAddress::changeAddress() {
   state.isAddressChanged = false;
 
   // Сканирование всех адресов и подключение к датчику.
-  current_addr = scanI2CAddress();
+  current_addr = scanI2CAddress(DEFAULT_IR_ADDR);
   if (current_addr != 0u && ir_sensor.begin(current_addr)) {
-    // Подключение успешно: меняем адрес датчика и повторно подключаемся по новому.
-    writeIrSensorAddress();
-
-    uint8_t newAddr = parseAddress(NEW_IR_ADDR);
-    if (ir_sensor.begin(newAddr)) {
-      state.isAddressChanged = true;
-    }
+    // Подключение успешно: меняем адрес. Так как датчик применит новый адрес после
+    // сброса (выключения питания), флаг фиксируем по успешной записи адреса в EEPROM.
+    state.isAddressChanged = writeIrSensorAddress();
   }
 }
 

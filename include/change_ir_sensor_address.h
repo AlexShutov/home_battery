@@ -28,7 +28,8 @@ public:
     void loop() override;
 
     // Записывает в EEPROM датчика новый адрес, заданный константной строкой.
-    void writeIrSensorAddress();
+    // Возвращает true, если запись принята датчиком.
+    bool writeIrSensorAddress();
 
     // Возвращает текущее состояние смены адреса в выходной параметр.
     void getState(IrSensorAddressState& out) const;

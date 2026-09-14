@@ -7,7 +7,7 @@ Display::Display(uint8_t address, uint8_t cols, uint8_t rows)
 
 void Display::init() { lcd.begin(cols, rows); lcd.backlight(); }
 
-void Display::print(const String& firstString, const String& secondString) {
+void Display::print(const char* firstString, const char* secondString) {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(firstString);

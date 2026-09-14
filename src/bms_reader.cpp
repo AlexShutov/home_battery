@@ -17,11 +17,23 @@ bool BmsReader::readBmsValues(BmsReadings& readings) {
   // Переносим актуальные значения в выходной параметр независимо от результата
   // (частично обновлённые данные лучше пустых при обрыве связи).
   copyFromLibrary(readings);
+  // Фиксируем состояние внутри, чтобы getState() возвращал актуальные показания.
+  this->readings = readings;
   return ok;
 }
 
 bool BmsReader::isConnectionError() const {
   return connectionError;
+}
+
+void BmsReader::getState(BmsReadings& out) const {
+  out = readings;
+}
+
+void BmsReader::setState(const BmsReadings& newState) {
+  // У БМС нет управляемой аппаратной части (внешний источник данных), поэтому
+  // метод только фиксирует состояние.
+  readings = newState;
 }
 
 void BmsReader::copyFromLibrary(BmsReadings& readings) const {
