@@ -1,5 +1,6 @@
 #include "test_ir_sensor.h"
 #include <Wire.h>
+#include <math.h>
 
 const uint8_t TestIRSensor::MAX_SENSORS;
 
@@ -8,6 +9,9 @@ static const uint8_t DISPLAY_I2C_ADDRESS = 0x27;
 
 // Вспомогательный буфер значения температуры в виде числа с одной дробной цифрой.
 static char TEMP_BUF[8];
+
+// Последнее показание температуры датчика (для проверки NAN).
+static float CURRENT_TEMP;
 
 // Статические буферы строк экрана с показаниями датчиков (длина не превышает Display::LINE_BUF).
 static char SENSOR_LINE_1[Display::LINE_BUF];
@@ -40,8 +44,16 @@ void TestIRSensor::findSensors() {
       continue;
     }
 
-    // Устройство нашлось: инициализируем объект датчика для этого адреса.
-    sensors[sensor_count].begin(addr);
+    // Устройство нашлось: инициализируем объект датчика для этого адреса. Ошибка
+    // инициализации означает, что по адресу не настоящий MLX90614 — пропускаем.
+    if (!sensors[sensor_count].begin(addr)) {
+      continue;
+    }
+    // Контрольное чтение: стараемся не принять за датчик посторонний I2C-девайс
+    // (его чтение температуры даёт NAN).
+    if (isnan(sensors[sensor_count].readObjectTempC())) {
+      continue;
+    }
     ++sensor_count;
   }
 }
@@ -71,7 +83,13 @@ void TestIRSensor::formatLine(char* line, uint8_t index) {
   }
 
   // Показание с одной дробной цифрой сначала попадает во вспомогательный буфер.
-  dtostrf(sensors[index].readObjectTempC(), 0, 1u, TEMP_BUF);
+  CURRENT_TEMP = sensors[index].readObjectTempC();
+  // Чтение не удалось (датчик отключился или адрес не MLX90614) — выводим заглушку.
+  if (isnan(CURRENT_TEMP)) {
+    strcpy(&line[3], "--.-");
+    return;
+  }
+  dtostrf(CURRENT_TEMP, 0, 1u, TEMP_BUF);
   strcpy(&line[3], TEMP_BUF);
 
   // Единица измерения на конце строки.
