@@ -1,4 +1,5 @@
 #include "change_ir_sensor_address.h"
+#include <math.h>
 
 const uint8_t ChangeIRSensorAddress::DEFAULT_IR_ADDR;
 const char* const ChangeIRSensorAddress::NEW_IR_ADDR = "0x5B";
@@ -109,6 +110,11 @@ void ChangeIRSensorAddress::changeAddress() {
   // Сканирование всех адресов и подключение к датчику.
   current_addr = scanI2CAddress(DEFAULT_IR_ADDR);
   if (current_addr != 0u && ir_sensor.begin(current_addr)) {
+    // Контрольное чтение температуры: при ошибке чтения (NAN) по адресу ответил
+    // посторонний I2C-девайс, а не MLX90614 — в EEPROM чужого устройства не пишем.
+    if (isnan(ir_sensor.readObjectTempC())) {
+      return;
+    }
     // Подключение успешно: меняем адрес. Так как датчик применит новый адрес после
     // сброса (выключения питания), флаг фиксируем по успешной записи адреса в EEPROM.
     state.isAddressChanged = writeIrSensorAddress();
