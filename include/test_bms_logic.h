@@ -31,7 +31,4 @@ private:
 
     // Формирует строку вида "U=54.10V" (напряжение, В, две десятичные).
     void formatVoltageLine(char* line, float voltage);
-
-    // Последняя телеметрия БМС: выходной буфер для BmsReader::readBmsValues().
-    BmsReadings readings;
 };

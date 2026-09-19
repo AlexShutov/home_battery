@@ -16,7 +16,7 @@ void TestBmsLogic::init() {
 }
 
 void TestBmsLogic::loop() {
-  // При установленном флаге ошибки readBmsValues внутри printBms() является повторной
+  // При установленном флаге ошибки update() внутри printBms() является повторной
   // попыткой подключиться к БМС; успех сбрасывает флаг.
   printBms();
   delay(STATE_CHANGE_DELAY);
@@ -25,15 +25,16 @@ void TestBmsLogic::loop() {
 // Читает БМС и выводит показания либо "bms disconnect".
 void TestBmsLogic::printBms() {
   // Попытка прочитать БМС (в том числе повторная попытка подключения при обрыве связи).
-  bms_reader.readBmsValues(readings);
+  bms_reader.update();
   if (bms_reader.isConnectionError()) {
     // Связь с БМС недоступна (батарея разряжена) — "bms disconnect" в первой строке.
     strcpy(CURRENT_LINE, "bms disconnect");
     VOLTAGE_LINE[0] = '\0';
   } else {
-    // Ток на первую строку, напряжение на вторую.
-    formatCurrentLine(CURRENT_LINE, readings.packCurrent);
-    formatVoltageLine(VOLTAGE_LINE, readings.packVoltage);
+    // Ток на первую строку, напряжение на вторую; значения берутся напрямую из
+    // структур драйвера (без промежуточной копии под экономию RAM).
+    formatCurrentLine(CURRENT_LINE, bms_reader.getTelemetry().packCurrent);
+    formatVoltageLine(VOLTAGE_LINE, bms_reader.getTelemetry().packVoltage);
   }
   display.print(CURRENT_LINE, VOLTAGE_LINE);
 }

@@ -12,7 +12,8 @@ public:
 
     void init();
 
-    // Выводит две строки в кодировке дисплея (ASCII).
+    // Выводит две C-строки в кодировке дисплея (ASCII); String не используется,
+    // чтобы не выделять память динамически.
     void print(const char* firstString, const char* secondString);
 
 private:
