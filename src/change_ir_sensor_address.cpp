@@ -2,7 +2,7 @@
 #include <math.h>
 
 const uint8_t ChangeIRSensorAddress::DEFAULT_IR_ADDR;
-const char* const ChangeIRSensorAddress::NEW_IR_ADDR = "0x5B";
+const char* const ChangeIRSensorAddress::NEW_IR_ADDR = "0x5D";
 
 // Адрес дисплея на шине I2C (см. Display) — исключается при поиске датчика.
 static const uint8_t DISPLAY_I2C_ADDRESS = 0x27;
