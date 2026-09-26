@@ -6,6 +6,10 @@
 // Колбэк контроля температуры: без параметров, вызывается по факту события.
 typedef void (*TemperatureCallback)();
 
+// Колбэк ошибки инициализации датчика: параметр — номер датчика (1..NUM_SENSORS,
+// как в константах SENSOR_X_ADDRESS).
+typedef void (*SensorInitFailedCallback)(uint8_t sensorNumber);
+
 // Состояние контроля температуры по четырём IR-датчикам.
 struct TemperatureControlState {
     // Количество датчиков.
@@ -13,6 +17,9 @@ struct TemperatureControlState {
 
     // Последние показания датчиков, °C (NAN — данных нет).
     float temperatures[NUM_SENSORS];
+
+    // Успешно ли прошла инициализация датчика (датчик отвечает на своём адресе).
+    bool connected[NUM_SENSORS];
 
     // Выходит ли показание датчика за пределы своих min/max порогов.
     bool outOfRange[NUM_SENSORS];
@@ -60,10 +67,15 @@ public:
 
     // Подключает все датчики по их адресам и запоминает колбэки:
     // onCooledDown — все датчики остыли ниже минимальных порогов;
-    // onTempTooHigh — все датчики перегреты выше максимальных порогов.
+    // onTempTooHigh — все датчики перегреты выше максимальных порогов;
+    // onSensorInitFailed — датчик не инициализировался (параметр — номер 1..4).
+    // ignoreFailedSensors: true — не вызывать onSensorInitFailed и при проверке
+    // показаний в loop() исключать неработающие датчики из агрегированных
+    // состояний (ниже минимума/выше максимума считаются только ответившие).
     // Каждый датчик проверяется контрольным чтением одного показания:
     // возвращает true, только если все показания корректны (не NAN).
-    bool init(TemperatureCallback onCooledDown, TemperatureCallback onTempTooHigh);
+    bool init(TemperatureCallback onCooledDown, TemperatureCallback onTempTooHigh,
+              SensorInitFailedCallback onSensorInitFailed, bool ignoreFailedSensors);
 
     // Опрашивает все датчики, проверяет нахождение показаний в пределах min/max
     // и при переходе в состояние полного остывания/перегрева вызывает колбэк.
@@ -97,4 +109,11 @@ private:
 
     // Колбэк перегрева (все датчики выше максимума).
     TemperatureCallback onTempTooHigh;
+
+    // Колбэк ошибки инициализации датчика (номер датчика 1..NUM_SENSORS).
+    SensorInitFailedCallback onSensorInitFailed;
+
+    // Режим игнорирования неработающих датчиков: колбэк ошибки инициализации
+    // не вызывается, при агрегировании учитываются только ответившие датчики.
+    bool ignoreFailedSensors;
 };
