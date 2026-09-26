@@ -62,6 +62,13 @@ public:
     static const int8_t SENSOR_4_MIN_THRESHOLD_TEMP = 40;
     static const int8_t SENSOR_4_MAX_THRESHOLD_TEMP = 75;
 
+    // Минимальные пороги по индексу датчика, °C (открыты для потребителей,
+    // определяющих направление выхода показания за пределы).
+    static const int8_t MIN_THRESHOLD_TEMPS[NUM_SENSORS];
+
+    // Максимальные пороги по индексу датчика, °C.
+    static const int8_t MAX_THRESHOLD_TEMPS[NUM_SENSORS];
+
     // Конструктор: колбэки сброшены, показаний нет.
     TemperatureControl();
 
@@ -88,12 +95,6 @@ public:
     void setState(const TemperatureControlState& newState);
 
 private:
-    // Минимальные пороги по индексу датчика, °C.
-    static const int8_t MIN_THRESHOLD_TEMPS[NUM_SENSORS];
-
-    // Максимальные пороги по индексу датчика, °C.
-    static const int8_t MAX_THRESHOLD_TEMPS[NUM_SENSORS];
-
     // Инициализирует датчик по индексу с заданным адресом; true — датчик ответил
     // корректным контрольным показанием.
     bool initSensor(uint8_t index, uint8_t address);
