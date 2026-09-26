@@ -26,26 +26,31 @@ TemperatureControl::TemperatureControl() {
   state.allTooHot = false;
 }
 
-// Инициализирует датчик по индексу с заданным адресом.
-void TemperatureControl::initSensor(uint8_t index, uint8_t address) {
+// Инициализирует датчик по индексу с заданным адресом; IrSensor::init читает
+// одно контрольное показание и возвращает true только при корректном значении.
+bool TemperatureControl::initSensor(uint8_t index, uint8_t address) {
   state.temperatures[index] = NAN;
   state.outOfRange[index] = false;
-  sensors[index].init(address);
+  return sensors[index].init(address);
 }
 
-void TemperatureControl::init(TemperatureCallback cooledDown, TemperatureCallback tooHigh) {
+bool TemperatureControl::init(TemperatureCallback cooledDown, TemperatureCallback tooHigh) {
   onCooledDown = cooledDown;
   onTempTooHigh = tooHigh;
 
   // Подключаем все датчики по их константным адресам (отсутствующий датчик
-  // останется с NAN — loop() это корректно обработает).
-  initSensor(0, SENSOR_1_ADDRESS);
-  initSensor(1, SENSOR_2_ADDRESS);
-  initSensor(2, SENSOR_3_ADDRESS);
-  initSensor(3, SENSOR_4_ADDRESS);
+  // останется с NAN — loop() это корректно обработает). Инициализируем все
+  // подряд, независимо от результата предыдущего.
+  bool allConnected = initSensor(0, SENSOR_1_ADDRESS);
+  allConnected = initSensor(1, SENSOR_2_ADDRESS) && allConnected;
+  allConnected = initSensor(2, SENSOR_3_ADDRESS) && allConnected;
+  allConnected = initSensor(3, SENSOR_4_ADDRESS) && allConnected;
 
   state.allCooledDown = false;
   state.allTooHot = false;
+
+  // true — все датчики ответили корректным показанием (не NAN).
+  return allConnected;
 }
 
 void TemperatureControl::loop() {

@@ -61,7 +61,9 @@ public:
     // Подключает все датчики по их адресам и запоминает колбэки:
     // onCooledDown — все датчики остыли ниже минимальных порогов;
     // onTempTooHigh — все датчики перегреты выше максимальных порогов.
-    void init(TemperatureCallback onCooledDown, TemperatureCallback onTempTooHigh);
+    // Каждый датчик проверяется контрольным чтением одного показания:
+    // возвращает true, только если все показания корректны (не NAN).
+    bool init(TemperatureCallback onCooledDown, TemperatureCallback onTempTooHigh);
 
     // Опрашивает все датчики, проверяет нахождение показаний в пределах min/max
     // и при переходе в состояние полного остывания/перегрева вызывает колбэк.
@@ -80,8 +82,9 @@ private:
     // Максимальные пороги по индексу датчика, °C.
     static const int8_t MAX_THRESHOLD_TEMPS[NUM_SENSORS];
 
-    // Инициализирует датчик по индексу с заданным адресом.
-    void initSensor(uint8_t index, uint8_t address);
+    // Инициализирует датчик по индексу с заданным адресом; true — датчик ответил
+    // корректным контрольным показанием.
+    bool initSensor(uint8_t index, uint8_t address);
 
     // IR-датчики температуры.
     IrSensor sensors[NUM_SENSORS];
