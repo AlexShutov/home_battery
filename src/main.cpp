@@ -6,7 +6,7 @@
 // TestDeviceLogic device_logic;
 
 TestIRSensor test_ir_sensor;
-// ChangeIRSensorAddress change_ir_sensor_address;
+ChangeIRSensorAddress change_ir_sensor_address;
 
 void setup() {
   // device_logic.init();

@@ -50,7 +50,7 @@ protected:
 
 private:
     // Стандартный (заводской) I2C-адрес датчика MLX90614.
-    static const uint8_t DEFAULT_IR_ADDR = 0x5A;
+    static const uint8_t DEFAULT_IR_ADDR = 0x60;
 
     // Новый I2C-адрес датчика, заданный константной строкой.
     static const char* const NEW_IR_ADDR;

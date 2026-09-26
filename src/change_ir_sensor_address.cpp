@@ -93,12 +93,13 @@ bool ChangeIRSensorAddress::writeIrSensorAddress() {
   uint8_t newAddr = parseAddress(NEW_IR_ADDR);
 
   // Записываем в EEPROM новый адрес (стирание ячейки и повторная запись — как в
-  // библиотеке для EEPROM). Адрес хранится в битах [7:1] младшего байта ячейки,
-  // поэтому значение сдвигаем на 1. Новый адрес датчик применит после сброса
-  // (выключения питания), поэтому успех считаем по принятой записи.
+  // библиотеке для EEPROM). Датчик сам размещает принятое слово в битах адреса,
+  // поэтому пишем сам адрес БЕЗ сдвига: проверено на железе — запись (0x5B<<1)=0xB6
+  // оставляла датчик на 0x36 = 0xB6 & 0x7F (двойной сдвиг). Новый адрес датчик
+  // применит после сброса (выключения питания), успех считаем по принятой записи.
   bool ok = writeEepromWord(current_addr, MLX90614_ADDR_REG, 0x0000);
   delay(10);
-  ok = writeEepromWord(current_addr, MLX90614_ADDR_REG, (uint16_t)(newAddr << 1)) && ok;
+  ok = writeEepromWord(current_addr, MLX90614_ADDR_REG, (uint16_t)newAddr) && ok;
   delay(10);
   return ok;
 }
