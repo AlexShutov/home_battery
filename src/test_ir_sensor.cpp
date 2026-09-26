@@ -13,6 +13,11 @@ static char TEMP_BUF[8];
 // Последнее показание температуры датчика (для проверки NAN).
 static float CURRENT_TEMP;
 
+// Полубайт в hex-символ ('0'..'F') для вывода адреса датчика.
+static char nibbleToHexChar(uint8_t nibble) {
+  return (char)(nibble < 10u ? '0' + nibble : 'A' + nibble - 10u);
+}
+
 // Статические буферы строк экрана с показаниями датчиков (длина не превышает Display::LINE_BUF).
 static char SENSOR_LINE_1[Display::LINE_BUF];
 static char SENSOR_LINE_2[Display::LINE_BUF];
@@ -54,6 +59,8 @@ void TestIRSensor::findSensors() {
     if (isnan(sensors[sensor_count].readObjectTempC())) {
       continue;
     }
+    // Запоминаем адрес найденного датчика — он выводится на экран после температуры.
+    sensor_addrs[sensor_count] = addr;
     ++sensor_count;
   }
 }
@@ -94,6 +101,14 @@ void TestIRSensor::formatLine(char* line, uint8_t index) {
 
   // Единица измерения на конце строки.
   strcat(line, "C");
+
+  // После температуры через пробел — адрес датчика в hex (строка вида "T1=23.5C 0x5B").
+  strcat(line, " 0x");
+  uint8_t addr = sensor_addrs[index];
+  TEMP_BUF[0] = nibbleToHexChar((uint8_t)(addr >> 4));
+  TEMP_BUF[1] = nibbleToHexChar((uint8_t)(addr & 0x0Fu));
+  TEMP_BUF[2] = '\0';
+  strcat(line, TEMP_BUF);
 }
 
 void TestIRSensor::updateState() {

@@ -41,4 +41,7 @@ private:
 
     // Количество найденных датчиков (не больше MAX_SENSORS).
     uint8_t sensor_count;
+
+    // Адреса найденных датчиков на шине I2C (индекс соответствует sensors[]).
+    uint8_t sensor_addrs[MAX_SENSORS];
 };
