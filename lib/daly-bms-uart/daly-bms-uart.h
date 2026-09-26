@@ -56,7 +56,7 @@ public:
         bool chargeFetState;          // charging MOSFET status
         bool disChargeFetState;       // discharge MOSFET state
         int bmsHeartBeat;             // BMS life (0~255 cycles)?
-        int resCapacitymAh;           // residual capacity mAH
+        uint32_t resCapacitymAh;     // residual capacity mAH (4 байта из 0x93, не влезает в 16-бит int)
 
         // data from 0x94
         int numberOfCells;    // Cell count

@@ -203,14 +203,17 @@ bool Daly_BMS_UART::getCellVoltages() // 0x95
     int cellNo = 0;
 
     // Check to make sure we have a valid number of cells
-    if (get.numberOfCells < MIN_NUMBER_CELLS && get.numberOfCells >= MAX_NUMBER_CELLS)
+    // Число банок обязано попадать в допустимый диапазон массивов (иначе уходим).
+    if (get.numberOfCells < MIN_NUMBER_CELLS || get.numberOfCells > MAX_NUMBER_CELLS)
     {
         return false;
     }
 
     this->sendCommand(COMMAND::CELL_VOLTAGES);
 
-    for (size_t i = 0; i <= ceil(get.numberOfCells / 3); i++)
+    // Кадров нужно ceil(numberOfCells / 3): по 3 напряжения в каждом кадре.
+    // Деление только целочисленное: (n + 2) / 3 — без float и ceil().
+    for (size_t i = 0; i < (size_t)((get.numberOfCells + 2) / 3); i++)
     {
         if (!this->receiveBytes())
         {
@@ -243,14 +246,15 @@ bool Daly_BMS_UART::getCellTemperature() // 0x96
     int sensorNo = 0;
 
     // Check to make sure we have a valid number of temp sensors
-    if ((get.numOfTempSensors < MIN_NUMBER_TEMP_SENSORS) && (get.numOfTempSensors >= MAX_NUMBER_TEMP_SENSORS))
+    if ((get.numOfTempSensors < MIN_NUMBER_TEMP_SENSORS) || (get.numOfTempSensors > MAX_NUMBER_TEMP_SENSORS))
     {
         return false;
     }
 
     this->sendCommand(COMMAND::CELL_TEMPERATURE);
 
-    for (size_t i = 0; i <= ceil(get.numOfTempSensors / 7); i++)
+    // Кадров нужно ceil(numOfTempSensors / 7): в кадре 7 температур.
+    for (size_t i = 0; i < (size_t)((get.numOfTempSensors + 6) / 7); i++)
     {
 
         if (!this->receiveBytes())
@@ -271,7 +275,8 @@ bool Daly_BMS_UART::getCellTemperature() // 0x96
 
             get.cellTemperature[sensorNo] = (this->my_rxBuffer[5 + i] - 40);
             sensorNo++;
-            if (sensorNo + 1 >= get.numOfTempSensors)
+            // Все датчики прочитаны — выходим (сравнение без +1, как в getCellVoltages).
+            if (sensorNo >= get.numOfTempSensors)
                 break;
         }
     }
@@ -284,7 +289,8 @@ bool Daly_BMS_UART::getCellBalanceState() // 0x97
     int cellBit = 0;
 
     // Check to make sure we have a valid number of cells
-    if (get.numberOfCells < MIN_NUMBER_CELLS && get.numberOfCells >= MAX_NUMBER_CELLS)
+    // Число банок обязано попадать в допустимый диапазон массивов (иначе уходим).
+    if (get.numberOfCells < MIN_NUMBER_CELLS || get.numberOfCells > MAX_NUMBER_CELLS)
     {
         return false;
     }
