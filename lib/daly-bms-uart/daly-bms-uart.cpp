@@ -362,14 +362,16 @@ bool Daly_BMS_UART::getFailureCodes() // 0x98
     alarm.levelTwoPackVoltageTooLow = bitRead(this->my_rxBuffer[4], 7);
 
     /* 0x01 */
-    alarm.levelOneChargeTempTooHigh = bitRead(this->my_rxBuffer[5], 1);
+    // Биты 0–7: уровень 1/2 тревог перегрева/переохлаждения при заряде и разряде
+    // (раскладка как у байта 0x00 — levelOne в чётных битах, levelTwo в нечётных).
+    alarm.levelOneChargeTempTooHigh = bitRead(this->my_rxBuffer[5], 0);
     alarm.levelTwoChargeTempTooHigh = bitRead(this->my_rxBuffer[5], 1);
-    alarm.levelOneChargeTempTooLow = bitRead(this->my_rxBuffer[5], 1);
-    alarm.levelTwoChargeTempTooLow = bitRead(this->my_rxBuffer[5], 1);
-    alarm.levelOneDischargeTempTooHigh = bitRead(this->my_rxBuffer[5], 1);
-    alarm.levelTwoDischargeTempTooHigh = bitRead(this->my_rxBuffer[5], 1);
-    alarm.levelOneDischargeTempTooLow = bitRead(this->my_rxBuffer[5], 1);
-    alarm.levelTwoDischargeTempTooLow = bitRead(this->my_rxBuffer[5], 1);
+    alarm.levelOneChargeTempTooLow = bitRead(this->my_rxBuffer[5], 2);
+    alarm.levelTwoChargeTempTooLow = bitRead(this->my_rxBuffer[5], 3);
+    alarm.levelOneDischargeTempTooHigh = bitRead(this->my_rxBuffer[5], 4);
+    alarm.levelTwoDischargeTempTooHigh = bitRead(this->my_rxBuffer[5], 5);
+    alarm.levelOneDischargeTempTooLow = bitRead(this->my_rxBuffer[5], 6);
+    alarm.levelTwoDischargeTempTooLow = bitRead(this->my_rxBuffer[5], 7);
 
     /* 0x02 */
     alarm.levelOneChargeCurrentTooHigh = bitRead(this->my_rxBuffer[6], 0);
