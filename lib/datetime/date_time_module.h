@@ -29,11 +29,15 @@ struct DateTimeModuleState {
     // Успешна ли инициализация (модуль отвечает, время валидно).
     bool connected;
 
+    // Валидно ли время модуля после включения питания (false — время сброшено:
+    // отсутствует/села резервная батарея, ждёт установки).
+    bool timeValid;
+
     // Сравнивает два состояния на равенство.
     bool operator==(const DateTimeModuleState& other) const {
         return year == other.year && month == other.month && day == other.day &&
                hour == other.hour && minute == other.minute && second == other.second &&
-               connected == other.connected;
+               connected == other.connected && timeValid == other.timeValid;
     }
 };
 
@@ -45,9 +49,10 @@ public:
     // Конструктор: модуль ещё не инициализирован, время обнулено.
     DateTimeModule();
 
-    // Инициализирует DS3231 на шине I2C: begin() проверяет отклик чипа,
-    // lostPower() — валидность времени (флаг поднимается при севшей резервной
-    // батарее). При успехе вызывает onInitOk, при неудаче — onInitFailed.
+    // Инициализирует DS3231 на шине I2C: begin() проверяет отклик чипа — это и
+    // есть критерий успеха. Если поднят флаг lostPower (новый модуль или севшая
+    // резервная батарея — время невалидно), время выставляется по дате и времени
+    // компиляции прошивки. При успехе вызывает onInitOk, при неудаче — onInitFailed.
     // Возвращает true при успешной инициализации.
     bool init(DateTimeCallback onInitOk, DateTimeCallback onInitFailed);
 

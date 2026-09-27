@@ -8,13 +8,25 @@ DateTimeModule::DateTimeModule() {
   state.minute = 0;
   state.second = 0;
   state.connected = false;
+  state.timeValid = false;
 }
 
 bool DateTimeModule::init(DateTimeCallback onInitOk, DateTimeCallback onInitFailed) {
   // begin() ищет DS3231 на шине I2C (перед этим Wire уже инициализирован шиной
-  // дисплея в DeviceLogic::init). lostPower() поднят, если резервная батарея
-  // села и показание времени невалидно — такую инициализацию считаем неудачей.
-  state.connected = rtc.begin() && !rtc.lostPower();
+  // дисплея в DeviceLogic::init). Критерий успеха — отклик чипа.
+  state.connected = rtc.begin();
+
+  // lostPower поднят, если при включении не было резервного питания и время
+  // сброшено (нет/села батарея, первое включение). Запоминаем валидность ДО
+  // корректировки: adjust() может не сбросить флаг, а смысл — «время сохранилось
+  // с прошлого включения».
+  state.timeValid = state.connected && !rtc.lostPower();
+
+  // При сброшенном времени стартуем с даты/времени компиляции прошивки —
+  // стандартный приём из примеров RTClib. Точное время установит потребитель.
+  if (state.connected && !state.timeValid) {
+    rtc.adjust(DateTime(__DATE__, __TIME__));
+  }
 
   if (state.connected) {
     if (onInitOk != nullptr) {
