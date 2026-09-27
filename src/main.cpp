@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include "test_device_logic.h"
-// #include "test_ir_sensor.h"
-#include "change_ir_sensor_address.h"
-// #include "test_temperature_control.h"
-// #include "date_time_test.h"
-#include "set_date_time.h"
+// #include "temperature/test_ir_sensor.h"
+#include "temperature/change_ir_sensor_address.h"
+// #include "temperature/test_temperature_control.h"
+// #include "datetime/date_time_test.h"
+#include "datetime/set_date_time.h"
 
 // TestDeviceLogic device_logic;
 
