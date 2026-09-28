@@ -232,7 +232,8 @@ void SetDateTime::loop() {
   }
 
   printScreen();
-  delay(STATE_CHANGE_DELAY);
+  // Период вызова задаёт задача-планировщик FreeRTOS (500 мс); собственная
+  // задержка не нужна — блокировать idle-контекст нельзя.
 }
 
 void SetDateTime::processSerialLine() {

@@ -3,9 +3,12 @@
 
 #define XFER_BUFFER_LENGTH 13
 #define MIN_NUMBER_CELLS 1
-#define MAX_NUMBER_CELLS 48
+// Размеры массивов телеметрии урезаны под проект (батарея 16S + запас):
+// экономия ~180 Б RAM под стеки FreeRTOS. Для сборок с большим числом
+// банок/датчиков вернуть 48/16.
+#define MAX_NUMBER_CELLS 17
 #define MIN_NUMBER_TEMP_SENSORS 1
-#define MAX_NUMBER_TEMP_SENSORS 16
+#define MAX_NUMBER_TEMP_SENSORS 5
 
 class Daly_BMS_UART
 {
@@ -67,13 +70,13 @@ public:
         int bmsCycles;        // charge / discharge cycles
 
         // data from 0x95
-        float cellVmV[48]; // Store Cell Voltages (mV)
+        float cellVmV[MAX_NUMBER_CELLS]; // Store Cell Voltages (mV)
 
         // data from 0x96
-        int cellTemperature[16]; // array of cell Temperature sensors
+        int cellTemperature[MAX_NUMBER_TEMP_SENSORS]; // array of cell Temperature sensors
 
         // data from 0x97
-        bool cellBalanceState[48]; // bool array of cell balance states
+        bool cellBalanceState[MAX_NUMBER_CELLS]; // bool array of cell balance states
         bool cellBalanceActive;    // bool is cell balance active
     } get;
 
