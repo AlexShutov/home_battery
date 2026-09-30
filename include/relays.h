@@ -1,27 +1,13 @@
 #pragma once
 
-#include <Arduino.h>
+#include <stdint.h>
 
-// Состояние четырёх реле.
-struct RelayState {
-    // Количество реле.
-    static const uint8_t NUM_RELAYS = 4;
+#include "device/statemachine/charging_relays_port.h"
+#include "relay_state.h"
 
-    // Состояние каждого реле: true — включено.
-    bool relays[NUM_RELAYS];
-
-    // Сравнивает два состояния на равенство.
-    bool operator==(const RelayState& other) const {
-        for (uint8_t i = 0; i < NUM_RELAYS; ++i) {
-            if (relays[i] != other.relays[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-};
-
-class Relays {
+// Реле зарядок станции. Реализует порт стейт-машины зарядки: машина
+// управляет реле через setState().
+class Relays : public ChargingRelaysPort {
 public:
     // Количество реле.
     static const uint8_t NUM_RELAYS = RelayState::NUM_RELAYS;
@@ -49,8 +35,9 @@ public:
     // Выключает реле по номеру (0..3).
     void turnOff(uint8_t relay);
 
-    // Устанавливает состояние реле по данным из массива.
-    void setState(const RelayState& newState);
+    // Устанавливает состояние реле по данным из массива (реализация порта
+    // стейт-машины зарядки).
+    void setState(const RelayState& newState) override;
 
     // Возвращает текущее состояние реле в выходной параметр.
     void getState(RelayState& out) const;

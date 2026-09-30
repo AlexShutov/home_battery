@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "relays.h"
 
 const uint8_t Relays::NUM_RELAYS;

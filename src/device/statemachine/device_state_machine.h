@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <tinyfsm.hpp>
 
+#include "charging_relays_port.h"
 #include "time_switcher.h"
 
 // Режим зарядки, соответствующий текущему состоянию машины.
@@ -47,6 +48,15 @@ struct DeviceStateMachine : tinyfsm::Fsm<DeviceStateMachine> {
     virtual void entry() = 0;
     virtual void exit() {}
 };
+
+// Привязывает реле зарядок к машине: действия входа и выхода состояний
+// управляют реле через applyChargingRelayState(). Вызывается до запуска
+// машины; до привязки команды реле игнорируются.
+void bindChargingRelays(ChargingRelaysPort& relays);
+
+// Применяет целевое состояние реле зарядок; вызывается только действиями
+// состояний. Если реле не привязаны, вызов игнорируется.
+void applyChargingRelayState(const RelayState& target);
 
 // Запускает стейт-машину устройства: выполняет вход в начальное состояние.
 void startDeviceStateMachine();

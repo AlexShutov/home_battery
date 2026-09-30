@@ -13,6 +13,10 @@ FSM_INITIAL_STATE(DeviceStateMachine, ChargingOffState)
 // входа состояний.
 static ChargingMode active_mode = CHARGING_MODE_OFF;
 
+// Реле зарядок, управляемые машиной: nullptr, пока машина не связана с
+// устройством (до bindChargingRelays).
+static ChargingRelaysPort* charging_relays = nullptr;
+
 // Событие смены тарифа существует в единственном экземпляре в статической
 // памяти: локальные объекты неинтегральных типов создавать нельзя.
 static TariffEvent tariff_event;
@@ -45,6 +49,20 @@ void DeviceStateMachine::react(TariffEvent const& event) {
       }
       break;
   }
+}
+
+// Привязывает реле зарядок к машине.
+void bindChargingRelays(ChargingRelaysPort& relays) {
+  charging_relays = &relays;
+}
+
+// Применяет целевое состояние реле зарядок (setState меняет и внутреннее
+// состояние, и ножки); пока реле не привязаны, вызов игнорируется.
+void applyChargingRelayState(const RelayState& target) {
+  if (charging_relays == nullptr) {
+    return;
+  }
+  charging_relays->setState(target);
 }
 
 // Запускает стейт-машину устройства; вызов статического метода библиотеки
