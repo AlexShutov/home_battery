@@ -286,7 +286,6 @@ bool Daly_BMS_UART::getCellTemperature() // 0x96
 bool Daly_BMS_UART::getCellBalanceState() // 0x97
 {
     int cellBalance = 0;
-    int cellBit = 0;
 
     // Check to make sure we have a valid number of cells
     // Число банок обязано попадать в допустимый диапазон массивов (иначе уходим).
@@ -305,23 +304,25 @@ bool Daly_BMS_UART::getCellBalanceState() // 0x97
         return false;
     }
 
-    // We expect 6 bytes response for this command
-    for (size_t i = 0; i < 6; i++)
+    // Критичный фикс: прежний цикл разбирал все 47 битов карты и записывал
+    // их в массив cellBalanceState[MAX_NUMBER_CELLS = 17] — запись выходила
+    // за границы массива на ~30 байтов и затирала cellBalanceActive и поля
+    // структуры alarm (ложные тревоги после 0x97, UB). Байты 4..9 ответа —
+    // битовая карта балансировки (бит 0 = банка 1, внутри байта биты идут
+    // с младшего). Читаем только биты существующих банок, хвост массива
+    // очищаем от прошлого состояния.
+    for (int cell = 0; cell < get.numberOfCells; cell++)
     {
-        // For each bit in the byte, pull out the cell balance state boolean
-        for (size_t j = 0; j < 8; j++)
+        bool balanced = bitRead(this->my_rxBuffer[4 + (cell / 8)], cell % 8);
+        get.cellBalanceState[cell] = balanced;
+        if (balanced)
         {
-            get.cellBalanceState[cellBit] = bitRead(this->my_rxBuffer[i + 4], j);
-            cellBit++;
-            if (bitRead(this->my_rxBuffer[i + 4], j))
-            {
-                cellBalance++;
-            }
-            if (cellBit >= 47)
-            {
-                break;
-            }
+            cellBalance++;
         }
+    }
+    for (int cell = get.numberOfCells; cell < MAX_NUMBER_CELLS; cell++)
+    {
+        get.cellBalanceState[cell] = false;
     }
 
 #ifdef DEBUG_SERIAL
@@ -333,14 +334,7 @@ bool Daly_BMS_UART::getCellBalanceState() // 0x97
     DEBUG_SERIAL.print("\n");
 #endif
 
-    if (cellBalance > 0)
-    {
-        get.cellBalanceActive = true;
-    }
-    else
-    {
-        get.cellBalanceActive = false;
-    }
+    get.cellBalanceActive = (cellBalance > 0);
 
     return true;
 }
