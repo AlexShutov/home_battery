@@ -123,12 +123,13 @@ def main():
 
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    # CSV: кривая разряда от 100 % к 0 %.
+    # CSV: кривая разряда от 100 % к 0 %. Файл содержит только заголовок и
+    # данные — без комментариев-«#»: строки с запятыми ломают csvlint в
+    # VS Code. Происхождение данных описано в шапке этого скрипта и в
+    # генерируемой charge_curve_table.h.
     csv_path = os.path.join(repo, "src", "device", "battery", "charge_curve.csv")
     with open(csv_path, "w", newline="") as handle:
         handle.write("soc_percent,cell_voltage_v\n")
-        handle.write("# LiFePO4 BSE 1500 mAh, профиль DC3 (C/3), среднее по 5 ячейкам\n")
-        handle.write("# Источник: IEEE DataPort DOI 10.21227/cm0f-jg66, CC BY 4.0\n")
         for soc, volt in reversed(points):
             handle.write("%.1f,%.4f\n" % (soc, volt))
     print("записан " + csv_path)

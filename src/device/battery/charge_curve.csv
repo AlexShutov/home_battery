@@ -1,6 +1,4 @@
 soc_percent,cell_voltage_v
-# LiFePO4 BSE 1500 mAh, профиль DC3 (C/3), среднее по 5 ячейкам
-# Источник: IEEE DataPort DOI 10.21227/cm0f-jg66, CC BY 4.0
 100.0,3.3474
 95.0,3.2969
 90.0,3.2933
