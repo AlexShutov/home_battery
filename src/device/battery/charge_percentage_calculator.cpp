@@ -8,6 +8,12 @@
 static const int CURVE_POINTS = CHARGE_CURVE_POINTS;
 
 float ChargePercentageCalculator::calculate(float packVoltage) {
+  // Отсутствие значения (NaN из телеметрии БМС): батарею считаем пустой.
+  // Проверка «x != x» истинна только для NaN и не тянет зависимостей.
+  if (packVoltage != packVoltage) {
+    return 0.0f;
+  }
+
   // Кривая разряда построена для одной ячейки: пересчёт напряжения
   // сборки 8s в напряжение ячейки.
   float cellVoltage = packVoltage / NUM_CELLS;
