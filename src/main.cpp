@@ -9,6 +9,7 @@
 // #include "temperature/test_temperature_control.h"
 // #include "datetime/date_time_test.h"
 #include "datetime/set_date_time.h"
+// #include "test_charging_fsm.h"
 
 void loop();
 
@@ -52,11 +53,13 @@ extern "C" void vApplicationIdleHook(void) {
 // TestTemperatureControl test_temperature_control;
 // DateTimeTest date_time_test;
 SetDateTime set_date_time;
+// TestChargingFsm test_charging_fsm;
 
 void setup() {
   // Вся инициализация приложения — в главном контексте до старта планировщика:
   // здесь delay() библиотек остаётся обычной паузой, ограничений RTOS нет.
   set_date_time.init();
+  // test_charging_fsm.init();
 
   // Задача-планировщик с минимальным стеком; главный цикл ведёт idle-задача.
   xTaskCreate(schedulerTask, "sched", SCHEDULER_TASK_STACK_SIZE, nullptr, 1, nullptr);
@@ -77,4 +80,5 @@ void loop() {
   // test_temperature_control.loop();
   // date_time_test.loop();
   set_date_time.loop();
+  // test_charging_fsm.loop();
 }
