@@ -1,0 +1,17 @@
+{
+    "name": "mlinterp",
+    "version": "1.0.0",
+    "description": "Fast arbitrary dimension linear interpolation in C++ (AVR port, vendored)",
+    "keywords": "interpolation",
+    "license": "MIT",
+    "homepage": "https://parsiad.ca/mlinterp/",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/parsiad/mlinterp.git"
+    },
+    "frameworks": "*",
+    "platforms": "*",
+    "export": {
+        "include": ["mlinterp"]
+    }
+}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "bms_reader.h"
+#include "device/battery/bms_reader.h"
 #include "display.h"
 #include "device_screen.h"
 #include "relays.h"

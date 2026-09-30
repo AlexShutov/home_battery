@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bms_reader.h"
+#include "device/battery/bms_reader.h"
 #include "device_logic.h"
 
 // Тестовый вариант логики устройства: периодическое считывание телеметрии Daly BMS
