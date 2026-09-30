@@ -1,6 +1,7 @@
 #pragma once
 
 #include "device_logic.h"
+#include "device/battery/battery_reader.h"
 #include "statemachine/device_state_machine.h"
 
 // Состояние аккумуляторной станции: тарифный период и режим зарядки.
@@ -39,4 +40,11 @@ protected:
     // Реакция на изменение состояния устройства (смена тарифного периода):
     // сообщает стейт-машине новый тариф.
     void updateState() override;
+
+private:
+    // Опрашивает БМС и обновляет снимок показаний батареи в стейт-машине.
+    void updateBatterySnapshot();
+
+    // Показания батареи для передачи в стейт-машину.
+    BatteryState battery_state;
 };

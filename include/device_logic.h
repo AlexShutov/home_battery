@@ -1,15 +1,19 @@
 #pragma once
 
 #include <Arduino.h>
-#include "device/battery/bms_reader.h"
-#include "display.h"
+#include "chargecontrol/charge_control.h"
+#include "device/battery/battery_reader.h"
 #include "device_screen.h"
-#include "relays.h"
+#include "display.h"
 #include "time_switcher.h"
 
 // Базовый абстрактный класс логики устройства: хранит компоненты и состояние,
 // реализует общую инициализацию и опрос состояния.
 class DeviceLogic {
+public:
+    // Конструктор: связывает читатель батареи с читателем телеметрии БМС.
+    DeviceLogic();
+
 protected:
     // Инициализирует ножки и компоненты устройства, считывает начальное состояние и выводит его на дисплей.
     virtual void init();
@@ -35,11 +39,13 @@ protected:
     // Дисплей устройства.
     Display display;
 
-    // Реле устройства.
-    Relays relays;
+    // Контроль зарядок станции (реле зарядок и их целевое состояние).
+    ChargeControl charge_control;
 
-    // Чтец телеметрии Daly BMS (Serial, 9600 8N1).
+    // Чтец телеметрии Daly BMS (Serial, 9600 8N1) и рассчитанные по ней
+    // показания батареи.
     BmsReader bms_reader;
+    BatteryReader battery_reader;
 
     // Экран с выводом состояния устройства.
     DeviceScreen screen;

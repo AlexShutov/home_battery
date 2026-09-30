@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <tinyfsm.hpp>
 
-#include "charging_relays_port.h"
 #include "time_switcher.h"
 
 // Режим зарядки, соответствующий текущему состоянию машины.
@@ -31,6 +30,10 @@ struct TariffEvent : tinyfsm::Event {
     TimeInterval tariff;
 };
 
+// Предварительные объявления: контроль зарядок и показания батареи.
+class ChargeControl;
+struct BatteryState;
+
 // Предварительные объявления состояний зарядки.
 struct ChargingOffState;
 struct MinimalPowerChargingState;
@@ -49,14 +52,22 @@ struct DeviceStateMachine : tinyfsm::Fsm<DeviceStateMachine> {
     virtual void exit() {}
 };
 
-// Привязывает реле зарядок к машине: действия входа и выхода состояний
-// управляют реле через applyChargingRelayState(). Вызывается до запуска
-// машины; до привязки команды реле игнорируются.
-void bindChargingRelays(ChargingRelaysPort& relays);
+// Привязывает контроль зарядок к машине: действия состояний рассчитывают
+// и применяют целевое состояние зарядок. Вызывается до запуска машины;
+// до привязки действия состояний зарядки не меняют.
+void bindChargeControl(ChargeControl& control);
 
-// Применяет целевое состояние реле зарядок; вызывается только действиями
-// состояний. Если реле не привязаны, вызов игнорируется.
-void applyChargingRelayState(const RelayState& target);
+// Обновляет снимок показаний батареи, по которому состояния рассчитывают
+// целевое состояние зарядок; станция кладёт свежие показания перед
+// отправкой тарифного события.
+void setBatterySnapshot(const BatteryState& battery);
+
+// Привязанный контроль зарядок: nullptr, пока машина не связана с
+// устройством.
+ChargeControl* getChargeControl();
+
+// Снимок показаний батареи для расчётов состояний.
+const BatteryState& getBatterySnapshot();
 
 // Запускает стейт-машину устройства: выполняет вход в начальное состояние.
 void startDeviceStateMachine();

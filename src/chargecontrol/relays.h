@@ -2,12 +2,10 @@
 
 #include <stdint.h>
 
-#include "device/statemachine/charging_relays_port.h"
 #include "relay_state.h"
 
-// Реле зарядок станции. Реализует порт стейт-машины зарядки: машина
-// управляет реле через setState().
-class Relays : public ChargingRelaysPort {
+// Реле зарядок станции: каждое реле коммутирует отдельную зарядку.
+class Relays {
 public:
     // Количество реле.
     static const uint8_t NUM_RELAYS = RelayState::NUM_RELAYS;
@@ -35,9 +33,8 @@ public:
     // Выключает реле по номеру (0..3).
     void turnOff(uint8_t relay);
 
-    // Устанавливает состояние реле по данным из массива (реализация порта
-    // стейт-машины зарядки).
-    void setState(const RelayState& newState) override;
+    // Устанавливает состояние реле по данным из массива.
+    void setState(const RelayState& newState);
 
     // Возвращает текущее состояние реле в выходной параметр.
     void getState(RelayState& out) const;

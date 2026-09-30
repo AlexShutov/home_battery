@@ -3,11 +3,14 @@
 const uint16_t DeviceLogic::RELAY_TIME;
 const uint16_t DeviceLogic::STATE_CHANGE_DELAY;
 
+// Связывает читатель батареи с читателем телеметрии БМС.
+DeviceLogic::DeviceLogic() : battery_reader(bms_reader) {}
+
 void DeviceLogic::init() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   screen.init(display);
-  relays.init();
+  charge_control.init();
   time_switcher.init();
   bms_reader.init();
   readDeviceState(device_state);
@@ -15,10 +18,10 @@ void DeviceLogic::init() {
   screen.print_state(device_state);
 }
 
-// Считывает актуальное состояние из TimeSwitcher и Relays.
+// Считывает актуальное состояние из TimeSwitcher и реле зарядок.
 void DeviceLogic::readDeviceState(DeviceState& state) {
   state.time_interval_type = time_switcher.getState();
-  relays.getState(state.relays);
+  charge_control.getRelayState(state.relays);
 }
 
 // Считывает актуальное состояние из TimeSwitcher и Relays; при изменении состояния вызывает updateState().

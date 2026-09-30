@@ -1,7 +1,7 @@
 #pragma once
 
+#include "chargecontrol/relays.h"
 #include "display.h"
-#include "relays.h"
 #include "time_switcher.h"
 
 // Состояние устройства, выводимое на дисплей.

@@ -1,6 +1,7 @@
 #include "device_state_machine.h"
 
 #include "always_charging_state.h"
+#include "chargecontrol/charge_control.h"
 #include "charging_off_state.h"
 #include "max_power_charging_state.h"
 #include "minimal_power_charging_state.h"
@@ -13,13 +14,17 @@ FSM_INITIAL_STATE(DeviceStateMachine, ChargingOffState)
 // входа состояний.
 static ChargingMode active_mode = CHARGING_MODE_OFF;
 
-// Реле зарядок, управляемые машиной: nullptr, пока машина не связана с
-// устройством (до bindChargingRelays).
-static ChargingRelaysPort* charging_relays = nullptr;
-
 // Событие смены тарифа существует в единственном экземпляре в статической
 // памяти: локальные объекты неинтегральных типов создавать нельзя.
 static TariffEvent tariff_event;
+
+// Привязанный контроль зарядок: nullptr, пока машина не связана с
+// устройством; действия состояний при этом зарядки не меняют.
+static ChargeControl* charge_control = nullptr;
+
+// Снимок показаний батареи для расчётов состояний: единственный экземпляр
+// в статической памяти.
+static BatteryState battery_snapshot;
 
 // Таблица переходов машины: тарифный период -> состояние зарядки. Если машина
 // уже в целевом состоянии, переход не выполняется, чтобы не перезапускать
@@ -51,18 +56,24 @@ void DeviceStateMachine::react(TariffEvent const& event) {
   }
 }
 
-// Привязывает реле зарядок к машине.
-void bindChargingRelays(ChargingRelaysPort& relays) {
-  charging_relays = &relays;
+// Привязывает контроль зарядок к машине.
+void bindChargeControl(ChargeControl& control) {
+  charge_control = &control;
 }
 
-// Применяет целевое состояние реле зарядок (setState меняет и внутреннее
-// состояние, и ножки); пока реле не привязаны, вызов игнорируется.
-void applyChargingRelayState(const RelayState& target) {
-  if (charging_relays == nullptr) {
-    return;
-  }
-  charging_relays->setState(target);
+// Обновляет снимок показаний батареи.
+void setBatterySnapshot(const BatteryState& battery) {
+  battery_snapshot = battery;
+}
+
+// Возвращает привязанный контроль зарядок.
+ChargeControl* getChargeControl() {
+  return charge_control;
+}
+
+// Возвращает снимок показаний батареи.
+const BatteryState& getBatterySnapshot() {
+  return battery_snapshot;
 }
 
 // Запускает стейт-машину устройства; вызов статического метода библиотеки

@@ -1,29 +1,8 @@
 #pragma once
 
+#include "battery_state.h"
 #include "bms_reader.h"
 #include "charge_percentage_calculator.h"
-
-// Состояние батареи: показания БМС и расчётный процент зарядки.
-struct BatteryState {
-    // Ток сборки, А (положительный — заряд, отрицательный — разряд).
-    float current;
-
-    // Напряжение сборки, В.
-    float voltage;
-
-    // Флаг нормальной температуры батареи по тревогам БМС.
-    bool isTemperatureOk;
-
-    // Расчётный оставшийся процент зарядки, % (0..100).
-    float chargePercentage;
-
-    // Сравнивает два состояния на равенство.
-    bool operator==(const BatteryState& other) const {
-        return current == other.current && voltage == other.voltage &&
-               isTemperatureOk == other.isTemperatureOk &&
-               chargePercentage == other.chargePercentage;
-    }
-};
 
 // Читатель батареи: опрашивает БМС через BmsReader (ток, напряжение,
 // температурные тревоги) и рассчитывает оставшийся процент зарядки по
