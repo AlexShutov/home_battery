@@ -6,7 +6,7 @@
 
 // Целевое состояние зарядок для входа. Хранится статически — локальные
 // объекты неинтегральных типов создавать нельзя (правило «Память»).
-static ChargeControlState target_state;
+static ChargeControlState always_target_state;
 
 // Действие входа: постоянная зарядка — фиксирует режим и включает все
 // зарядки. Целевое состояние рассчитывается с isMinimalCurrent = false:
@@ -19,8 +19,8 @@ void AlwaysChargingState::entry() {
   if (control == nullptr) {
     return;
   }
-  control->calculateTargetState(getBatterySnapshot(), target_state, false);
-  control->activateTargetState(getBatterySnapshot(), target_state);
+  control->calculateTargetState(getBatterySnapshot(), always_target_state, false);
+  control->activateTargetState(getBatterySnapshot(), always_target_state);
 }
 
 // Действия выхода нет: смена тарифного периода выполняется таблицей

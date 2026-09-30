@@ -15,7 +15,7 @@ static const float LOW_CHARGE_PERCENT = 50.0f;
 
 // Целевое состояние зарядок. Хранится статически — локальные объекты
 // неинтегральных типов создавать нельзя (правило «Память»).
-static ChargeControlState target_state;
+static ChargeControlState minimal_target_state;
 
 MinimalPowerChargingState::MinimalPowerChargingState() : isHighConsumption(false) {}
 
@@ -46,19 +46,19 @@ void MinimalPowerChargingState::evaluate() {
   // Уже дозаряжаем: электричество не очень дорогое, продолжаем до выхода
   // из состояния, уровень заряда повторно не проверяется.
   if (isHighConsumption) {
-    control->calculateTargetState(battery, target_state, false);
-    control->activateTargetState(battery, target_state);
+    control->calculateTargetState(battery, minimal_target_state, false);
+    control->activateTargetState(battery, minimal_target_state);
     return;
   }
 
   if (battery.chargePercentage > HIGH_CHARGE_PERCENT) {
     // Пользователь тратит электричество не слишком активно — заряда
     // хватит, все зарядки выключаются.
-    target_state.isChargeOn = false;
+    minimal_target_state.isChargeOn = false;
     for (uint8_t i = 0; i < RelayState::NUM_RELAYS; ++i) {
-      target_state.activeRelays[i] = 0;
+      minimal_target_state.activeRelays[i] = 0;
     }
-    control->activateTargetState(battery, target_state);
+    control->activateTargetState(battery, minimal_target_state);
     return;
   }
 
@@ -66,8 +66,8 @@ void MinimalPowerChargingState::evaluate() {
     // Высокое потребление: поднимаем флаг и дозаряжаем батарею полностью
     // всеми зарядками.
     isHighConsumption = true;
-    control->calculateTargetState(battery, target_state, false);
-    control->activateTargetState(battery, target_state);
+    control->calculateTargetState(battery, minimal_target_state, false);
+    control->activateTargetState(battery, minimal_target_state);
     return;
   }
 
