@@ -18,6 +18,9 @@ static ChargingMode active_mode = CHARGING_MODE_OFF;
 // памяти: локальные объекты неинтегральных типов создавать нельзя.
 static TariffEvent tariff_event;
 
+// Событие обновления показаний батареи: тоже единственный экземпляр.
+static BatterySnapshotEvent battery_event;
+
 // Привязанный контроль зарядок: nullptr, пока машина не связана с
 // устройством; действия состояний при этом зарядки не меняют.
 static ChargeControl* charge_control = nullptr;
@@ -86,6 +89,11 @@ void startDeviceStateMachine() {
 void setTariff(TimeInterval tariff) {
   tariff_event.tariff = tariff;
   DeviceStateMachine::dispatch(tariff_event);
+}
+
+// Отправляет машине событие обновления показаний батареи.
+void notifyBatterySnapshot() {
+  DeviceStateMachine::dispatch(battery_event);
 }
 
 // Возвращает режим зарядки текущего состояния машины.

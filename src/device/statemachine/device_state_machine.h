@@ -30,6 +30,12 @@ struct TariffEvent : tinyfsm::Event {
     TimeInterval tariff;
 };
 
+// Событие: показания батареи обновлены (снапшот уже положен через
+// setBatterySnapshot()). Состояния, которым важен уровень заряда внутри
+// своего тарифного периода (например, средний тариф), переоценивают
+// конфигурацию зарядок; остальные события игнорируют.
+struct BatterySnapshotEvent : tinyfsm::Event {};
+
 // Предварительные объявления: контроль зарядок и показания батареи.
 class ChargeControl;
 struct BatteryState;
@@ -48,6 +54,9 @@ struct AlwaysChargingState;
 // тариф).
 struct DeviceStateMachine : tinyfsm::Fsm<DeviceStateMachine> {
     virtual void react(TariffEvent const&);
+    // Реакция на обновление показаний батареи: по умолчанию состояния
+    // событие игнорируют.
+    virtual void react(BatterySnapshotEvent const&) {}
     virtual void entry() = 0;
     virtual void exit() {}
 };
@@ -75,6 +84,10 @@ void startDeviceStateMachine();
 // Сообщает машине о новом тарифном периоде: зарядка переводится в
 // соответствующее состояние (таблица переходов в device_state_machine.cpp).
 void setTariff(TimeInterval tariff);
+
+// Сообщает машине об обновлении показаний батареи: снапшот уже положен
+// через setBatterySnapshot(), состояния берут его через getBatterySnapshot().
+void notifyBatterySnapshot();
 
 // Возвращает режим зарядки, соответствующий текущему состоянию машины.
 ChargingMode getChargingMode();
