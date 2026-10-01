@@ -41,10 +41,26 @@ bool DateTimeModule::init(DateTimeCallback onInitOk, DateTimeCallback onInitFail
   return state.connected;
 }
 
+// Проверяет правдоподобность прочитанного времени. RTClib ничего не сообщает
+// об ошибке связи, но если DS3231 отсутствует на шине, now() возвращает модель
+// из неинициализированных регистров — почти наверняка вне допустимых диапазонов.
+static bool isPlausibleTime(const DateTime& t) {
+  return t.year() >= 2000u && t.year() <= 2099u && t.month() >= 1u &&
+         t.month() <= 12u && t.day() >= 1u && t.day() <= 31u && t.hour() <= 23u &&
+         t.minute() <= 59u && t.second() <= 59u;
+}
+
 void DateTimeModule::getTime(DateTime& out) {
   // now() возвращает модель библиотеки по значению — переносим её в выходной
   // параметр (модель передаётся по ссылке, локальные объекты не создаются).
   out = rtc.now();
+
+  // Обновляем флаги подключения и валидности по результату чтения, чтобы
+  // состояние не оставалось устаревшим (модуль мог пропасть с шины или время
+  // могло сброситься после инициализации). Валидность считаем только по
+  // правдоподобности показания — факт отклика чипа уже учтён в connected.
+  state.connected = isPlausibleTime(out);
+  state.timeValid = state.connected;
 
   // Обновляем интегральное состояние по полям модели.
   state.year = out.year();
@@ -58,6 +74,10 @@ void DateTimeModule::getTime(DateTime& out) {
 void DateTimeModule::setTime(const DateTime& newTime) {
   // adjust() записывает время в DS3231.
   rtc.adjust(newTime);
+
+  // После записи время заведомо установлено и валидно.
+  state.connected = true;
+  state.timeValid = true;
 
   // Синхронизируем состояние с записанным значением.
   state.year = newTime.year();

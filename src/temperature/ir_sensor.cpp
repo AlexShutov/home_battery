@@ -30,6 +30,10 @@ float IrSensor::read() {
     return state.temperature;
   }
   state.temperature = sensor.readObjectTempC();
+  // Флаг подключения отражает последнее чтение: при потере данных (NAN)
+  // getState() не должен сообщать о живом датчике. Отказ чтения фиксируется
+  // как разрыв связи до успешного повторного опроса.
+  state.connected = !isnan(state.temperature);
   return state.temperature;
 }
 

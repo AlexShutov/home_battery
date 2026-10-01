@@ -31,8 +31,8 @@
 
 // Исходники стейт-машины и контроля зарядок — в состав тестового
 // приложения. Заглушка Arduino.h выше закрывает зависимости от каркаса.
-#include "chargecontrol/charge_control_under_test.cpp"
-#include "chargecontrol/relays_under_test.cpp"
+#include "chargecontrol/charge_control.cpp"
+#include "chargecontrol/relays.cpp"
 #include "device/statemachine/always_charging_state.cpp"
 #include "device/statemachine/charging_off_state.cpp"
 #include "device/statemachine/device_state_machine.cpp"
@@ -63,6 +63,16 @@ void setUp() {
   PORTD = 0;
   charge_control_under_test.init();
   bindChargeControl(charge_control_under_test);
+  // Сбрасывает внутренние флаги всех состояний машины: tinyfsm хранит
+  // каждое состояние как статический синглтон, а start() не вызывает
+  // exit() предыдущего состояния (перезапуск сменяет только указатель на
+  // текущее состояние). Без сброса флаг isHighConsumption состояния MIDDLE
+  // переживал бы setUp() и ломал бы изоляцию тестов.
+  DeviceStateMachine::state<ChargingOffState>() = ChargingOffState();
+  DeviceStateMachine::state<MinimalPowerChargingState>() = MinimalPowerChargingState();
+  DeviceStateMachine::state<MaxPowerChargingState>() = MaxPowerChargingState();
+  DeviceStateMachine::state<OverheatingState>() = OverheatingState();
+  DeviceStateMachine::state<AlwaysChargingState>() = AlwaysChargingState();
   resetBattery();
   setBatterySnapshot(battery_under_test);
   // Старт (или перезапуск) машины: вход в начальное состояние ChargingOff.
@@ -76,10 +86,10 @@ void tearDown() {}
 // Проверяет логическое состояние четырёх реле зарядок.
 static void assertRelays(bool r1, bool r2, bool r3, bool r4) {
   charge_control_under_test.getRelayState(relays_under_test);
-  TEST_ASSERT_TRUE(r1 ? relays_under_test.relays_under_test[0] : !relays_under_test.relays_under_test[0]);
-  TEST_ASSERT_TRUE(r2 ? relays_under_test.relays_under_test[1] : !relays_under_test.relays_under_test[1]);
-  TEST_ASSERT_TRUE(r3 ? relays_under_test.relays_under_test[2] : !relays_under_test.relays_under_test[2]);
-  TEST_ASSERT_TRUE(r4 ? relays_under_test.relays_under_test[3] : !relays_under_test.relays_under_test[3]);
+  TEST_ASSERT_TRUE(r1 ? relays_under_test.relays[0] : !relays_under_test.relays[0]);
+  TEST_ASSERT_TRUE(r2 ? relays_under_test.relays[1] : !relays_under_test.relays[1]);
+  TEST_ASSERT_TRUE(r3 ? relays_under_test.relays[2] : !relays_under_test.relays[2]);
+  TEST_ASSERT_TRUE(r4 ? relays_under_test.relays[3] : !relays_under_test.relays[3]);
 }
 
 // После старта машина находится в состоянии «зарядка выключена».

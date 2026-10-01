@@ -31,11 +31,12 @@ void DeviceLogic::update() {
   // Сравнивание только через оператор == структуры состояния.
   if (!(new_device_state == device_state)) {
     device_state = new_device_state;
-    screen.print_state(device_state);
     updateState();
     // После реакции перечитываем фактическое состояние (updateState мог изменить реле),
-    // чтобы device_state не оставался устаревшим.
+    // чтобы device_state не оставался устаревшим, и выводим его на экран: печать
+    // до updateState показала бы старое состояние реле.
     readDeviceState(device_state);
+    screen.print_state(device_state);
     delay(STATE_CHANGE_DELAY);
   }
 }
